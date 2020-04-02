@@ -35,6 +35,10 @@ public class TransactionService {
             return null;
         }
 
+        if(amount < 0) {
+            return null;
+        }
+        
         int fromDeposit = fromUserRecord.getWallet();
         if(fromDeposit < amount) { // ISSUE: what if the transfer amount is greater than the from-user's deposit?
             return null;
@@ -44,7 +48,7 @@ public class TransactionService {
         fromUserRecord.store();
         toUserRecord.setWallet(toUserRecord.getWallet() + amount);
         toUserRecord.store();
-        
+
         TransferResponse tran = new TransferResponse();
         tran.setFromUser(fromUserRecord.into(User.class));
         tran.setToUser(toUserRecord.into(User.class));
