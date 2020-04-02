@@ -1,11 +1,14 @@
 package com.test.bank.service;
 
+import com.test.bank.db.tables.records.AdminRecord;
 import com.test.bank.initializer.DataSourceInitializer;
 import com.test.bank.model.AdminUser;
 import com.test.bank.tool.PasswordUtils;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultConfiguration;
 import org.jooq.types.UInteger;
+import org.jooq.Record1;
+import org.jooq.Result;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -40,7 +43,15 @@ public class AdminService {
     }
 
     public boolean authenticate(String token) {
-        // TODO implement authenticate
+        Result<Record1<UInteger>> queryResult = DSL.using(jooqConfiguration).select(TOKEN.ADMINID).from(TOKEN).where(TOKEN.TOKEN_.eq(token)).fetch();
+        if(queryResult.isEmpty() || queryResult.size() > 1) { // is there any chance to get multiple result due to some error?
+            return false; 
+        }
+        UInteger queryAdminId = queryResult.get(0).value1();
+        AdminRecord adminUser = DSL.using(jooqConfiguration).fetchOne(ADMIN, ADMIN.ID.eq(queryAdminId));
+        if (adminUser != null) {
+            return true;
+        }
         return false;
     }
 
